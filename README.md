@@ -13,7 +13,7 @@ API desenvolvida com **Python (FastAPI)** para simular seu futuro financeiro com
 - Projeção de saldo futuro (gráficos)
 - Geração de relatórios em PDF
 - Sugestões automáticas para melhorar suas finanças
-- API 100% documeentada via Swagger
+- API 100% documentada via Swagger
 
 ---
 
@@ -39,14 +39,14 @@ Acesse a API em : http://127.0.0.1:8000/docs
 |--- requirements.txt
 
 
-🧠 Tecnologias Usadas
+## 🧠 Tecnologias Usadas
 FastAPI - Framework moderno para APIs
 Pandas - Manipulação de dados
 Matplotlib - Geração de Gráficos
 ReportLab - Geração de PDF
 Uvicorn - Servidor ASGI
 
-📩 Contato
+## 📩 Contato
 Me chama no Linkedin ou veja mais projetos no Instagram.
 
 Curtiu? deixa uma estrela ⭐ no repositório e compartilha com a galera!
