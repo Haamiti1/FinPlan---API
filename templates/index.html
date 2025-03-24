@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FinPlan - Simulador Financeiro</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Simulador Financeiro</h1>
+        <form id="simulation-form">
+            <label>Renda Mensal (R$):</label>
+            <input type="number" id="income" required>
+
+            <label>Despesas - Aluguel:</label>
+            <input type="number" id="aluguel" required>
+
+            <label>Despesas - Transporte:</label>
+            <input type="number" id="transporte" required>
+
+            <label>Despesas - Alimentação:</label>
+            <input type="number" id="alimentacao" required>
+
+            <label>Despesas - Outros:</label>
+            <input type="number" id="outros" required>
+
+            <label>Investimento Mensal (R$):</label>
+            <input type="number" id="invest" required>
+
+            <label>Poupança Atual (R$):</label>
+            <input type="number" id="savings" required>
+
+            <button type="submit">Simular</button>
+        </form>
+        <div id="resultado"></div>
+    </div>
+
+    <script defer>
+        document.getElementById('simulation-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultado = document.getElementById('resultado');
+
+            const expenses = {
+                "Aluguel": parseFloat(document.getElementById('aluguel').value),
+                "Transporte": parseFloat(document.getElementById('transporte').value),
+                "Alimentação": parseFloat(document.getElementById('alimentacao').value),
+                "Outros": parseFloat(document.getElementById('outros').value)
+            };
+
+            const data = {
+                monthly_income: parseFloat(document.getElementById('income').value),
+                monthly_expanses: expenses,
+                monthly_investiment: parseFloat(document.getElementById('invest').value),
+                current_savings: parseFloat(document.getElementById('savings').value)
+            };
+
+            console.log("Enviando JSON:", data);
+
+            const response = await fetch('/simulate/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                resultado.innerHTML = `<p style="color:red;">Erro: ${JSON.stringify(error)}</p>`;
+                return;
+            }
+
+            const result = await response.json();
+            console.log("Resultado:", result);
+
+            resultado.innerHTML = `
+                <h2>Projeção de Caixa:</h2>
+                <ul>${result.cash_flow_projection.map(p => `<li>${p.month}: R$ ${p.projected_balance}</li>`).join('')}</ul>
+                <h3>Sugestões:</h3>
+                <ul>${result.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>
+            `;
+        });
+    </script>
+</body>
+</html>
