@@ -35,7 +35,7 @@ def generate_pdf_report(projection, suggestions, filename="report.pdf"):
 
     y -= 20
     c.drawString(100, y, "Sugestôes:")
-    y -= 20
+    y -= 20  
     for s in suggestions:
         c.drawString(120, y, f"- {s}")
         y -= 20
