@@ -30,7 +30,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Acesse a API em : http://127.0.0.1:8000/docs
+Acesse a API em : http://127.0.0.1:8000/
 
 📂Estrutura de Pastas
 |--- main.py        # Arquivo principal da API
