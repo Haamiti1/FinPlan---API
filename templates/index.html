@@ -1,83 +1,134 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>FinPlan - Simulador Financeiro</title>
-    <link rel="stylesheet" href="/static/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação Financeira</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #2e2e2e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px #000;
+        }
+
+        input, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border: none;
+            font-size: 16px;
+        }
+
+        input {
+            background-color: #444;
+            color: #fff;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Simulador Financeiro</h1>
+        <h1>Simulação Financeira</h1>
+
+        <!-- Formulário de simulação -->
         <form id="simulation-form">
-            <label>Renda Mensal (R$):</label>
-            <input type="number" id="income" required>
+            <label for="current_savings">Poupança Atual:</label>
+            <input type="number" id="current_savings" name="current_savings" required><br><br>
 
-            <label>Despesas - Aluguel:</label>
-            <input type="number" id="aluguel" required>
+            <label for="monthly_income">Renda Mensal:</label>
+            <input type="number" id="monthly_income" name="monthly_income" required><br><br>
 
-            <label>Despesas - Transporte:</label>
-            <input type="number" id="transporte" required>
+            <label for="monthly_expanses">Despesas Mensais:</label>
+            <input type="number" id="monthly_expanses" name="monthly_expanses" required><br><br>
 
-            <label>Despesas - Alimentação:</label>
-            <input type="number" id="alimentacao" required>
-
-            <label>Despesas - Outros:</label>
-            <input type="number" id="outros" required>
-
-            <label>Investimento Mensal (R$):</label>
-            <input type="number" id="invest" required>
-
-            <label>Poupança Atual (R$):</label>
-            <input type="number" id="savings" required>
+            <label for="monthly_investiment">Investimento Mensal:</label>
+            <input type="number" id="monthly_investiment" name="monthly_investiment" required><br><br>
 
             <button type="submit">Simular</button>
         </form>
-        <div id="resultado"></div>
+
+        <div id="simulation-result">
+            <!-- Resultado da simulação será exibido aqui -->
+        </div>
+
+        <button id="download-pdf-btn" style="display:none;">Baixar Relatório PDF</button>
     </div>
 
-    <script defer>
-        document.getElementById('simulation-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const resultado = document.getElementById('resultado');
+    <script>
+        // Manipulando o envio do formulário de simulação
+        document.getElementById("simulation-form").addEventListener("submit", function(event) {
+            event.preventDefault();
 
-            const expenses = {
-                "Aluguel": parseFloat(document.getElementById('aluguel').value),
-                "Transporte": parseFloat(document.getElementById('transporte').value),
-                "Alimentação": parseFloat(document.getElementById('alimentacao').value),
-                "Outros": parseFloat(document.getElementById('outros').value)
-            };
-
+            // Coletando os dados do formulário
             const data = {
-                monthly_income: parseFloat(document.getElementById('income').value),
-                monthly_expanses: expenses,
-                monthly_investiment: parseFloat(document.getElementById('invest').value),
-                current_savings: parseFloat(document.getElementById('savings').value)
+                current_savings: parseFloat(document.getElementById("current_savings").value),
+                monthly_income: parseFloat(document.getElementById("monthly_income").value),
+                monthly_expanses: { "alimentação": parseFloat(document.getElementById("monthly_expanses").value) },
+                monthly_investiment: parseFloat(document.getElementById("monthly_investiment").value)
             };
 
-            console.log("Enviando JSON:", data);
-
-            const response = await fetch('/simulate/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            // Enviando os dados para o endpoint de simulação
+            fetch("/simulate/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Exibindo o resultado da simulação
+                let resultHTML = "<h2>Resultado da Simulação</h2><ul>";
+                result.cash_flow_projection.forEach(item => {
+                    resultHTML += `<li>${item.month}: R$ ${item.projected_balance}</li>`;
+                });
+                resultHTML += "</ul><h3>Sugestões:</h3><ul>";
+                result.suggestions.forEach(suggestion => {
+                    resultHTML += `<li>${suggestion}</li>`;
+                });
+                resultHTML += "</ul>";
+                document.getElementById("simulation-result").innerHTML = resultHTML;
+
+                // Exibindo o botão de download
+                document.getElementById("download-pdf-btn").style.display = "inline-block";
+            })
+            .catch(error => {
+                console.error("Erro na simulação:", error);
             });
+        });
 
-            if (!response.ok) {
-                const error = await response.json();
-                resultado.innerHTML = `<p style="color:red;">Erro: ${JSON.stringify(error)}</p>`;
-                return;
-            }
+        // Ação do botão de download do PDF
+        document.getElementById("download-pdf-btn").addEventListener("click", function() {
+            // Suponha que o user_id seja uma variável dinâmica do usuário após a simulação
+            const user_id = "123"; // Exemplo de ID de usuário
 
-            const result = await response.json();
-            console.log("Resultado:", result);
-
-            resultado.innerHTML = `
-                <h2>Projeção de Caixa:</h2>
-                <ul>${result.cash_flow_projection.map(p => `<li>${p.month}: R$ ${p.projected_balance}</li>`).join('')}</ul>
-                <h3>Sugestões:</h3>
-                <ul>${result.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>
-            `;
+            // Chamando o endpoint para baixar o PDF
+            window.location.href = `/export/${user_id}`;
         });
     </script>
 </body>
